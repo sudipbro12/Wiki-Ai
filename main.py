@@ -7,36 +7,49 @@ from telegram.ext import (
     ContextTypes, filters
 )
 
+# ✅ Get BOT_TOKEN from environment variable (Railway or local .env)
 BOT_TOKEN = os.getenv("7699905568:AAE2qfZEZfKRiw_jbpnB5zkthH9c93ovmNM")
+if not BOT_TOKEN:
+    raise ValueError("❌ BOT_TOKEN not found. Set it as an environment variable.")
+
+# 🔧 Enable logging
 logging.basicConfig(level=logging.INFO)
 
+# 🌐 Track user language preferences
 user_lang = {}
 
+# /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Welcome to *Wiki-Ai*! Just send me any topic to search Wikipedia.\n\n"
-        "🌐 Use /lang en or /lang bn to change language.\nℹ️ Use /help for more.",
+        "👋 Welcome to *Wiki-Ai Bot*!\n\n"
+        "🔍 Just send me any topic name to search Wikipedia.\n"
+        "🌐 Use /lang en or /lang bn to set your language.\nℹ️ Use /help for more commands.",
         parse_mode="Markdown"
     )
 
+# /help command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "📚 *Wiki-Ai Help Menu:*\n\n"
+        "📚 *Wiki-Ai Bot Commands:*\n\n"
         "• Send any topic to search Wikipedia\n"
-        "• /lang en — Set language to English\n"
-        "• /lang bn — Set language to Bengali\n"
+        "• /lang en — Search in English\n"
+        "• /lang bn — Search in Bengali\n"
         "• /about — Bot info\n",
         parse_mode="Markdown"
     )
 
+# /about command
 async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🤖 *Wiki-Ai Bot*\nBuilt using Python & Telegram Bot API.\n"
-        "Powered by Wikipedia REST API.\n\n"
-        "Made with ❤️ by Sudip.",
+        "🤖 *Wiki-Ai Bot*\n\n"
+        "Made with Python + Wikipedia REST API.\n"
+        "Supports English and Bengali summaries.\n"
+        "Hosted on Railway.\n\n"
+        "Built by Sudip ❤️",
         parse_mode="Markdown"
     )
 
+# /lang command
 async def lang_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     args = context.args
@@ -50,12 +63,13 @@ async def lang_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_lang[user_id] = lang
         await update.message.reply_text(f"✅ Language set to {'English' if lang == 'en' else 'Bengali'}")
     else:
-        await update.message.reply_text("❌ Only 'en' and 'bn' are supported.")
+        await update.message.reply_text("❌ Only 'en' (English) and 'bn' (Bengali) are supported.")
 
+# Wikipedia search handler
 async def search_wikipedia(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.strip()
     user_id = update.effective_user.id
-    lang = user_lang.get(user_id, "en")
+    lang = user_lang.get(user_id, "en")  # Default language: English
 
     url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{query}"
     response = requests.get(url)
@@ -68,13 +82,15 @@ async def search_wikipedia(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("⚠️ No summary found.")
     elif response.status_code == 404:
-        await update.message.reply_text("❌ No Wikipedia article found.")
+        await update.message.reply_text("❌ Article not found on Wikipedia.")
     else:
-        await update.message.reply_text("⚠️ Failed to fetch data from Wikipedia.")
+        await update.message.reply_text("⚠️ Failed to connect to Wikipedia API.")
 
+# Main app startup
 async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    # Add command and message handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("about", about_command))
