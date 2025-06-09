@@ -1,4 +1,3 @@
-import os
 import logging
 import requests
 from telegram import Update
@@ -7,36 +6,35 @@ from telegram.ext import (
     ContextTypes, filters
 )
 
-# ✅ Get token from Railway environment variable
-BOT_TOKEN = os.environ["7699905568:AAFLHr44fH_OQo68cP2zTWch8UfitPR5OD4"]
+# ⚠️ Your bot token directly here (DON'T share it with others!)
+BOT_TOKEN = "7699905568:AAFLHr44fH_OQo68cP2zTWch8UfitPR5OD4"
 
-# ✅ Logging for debugging (optional)
+# ✅ Logging setup
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-# ✅ Store user language preferences
+# Store language preferences per user
 user_languages = {}
 
 # /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "👋 Welcome to Wiki-Ai Bot!\n\n"
-        "📘 Just send any topic to search Wikipedia.\n"
+        "📘 Send me any topic to search on Wikipedia.\n"
         "🌐 Use /lang en or /lang bn to change language."
     )
 
 # /help command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🛠 *Wiki-Ai Bot Help*\n\n"
+        "🛠 Commands:\n"
         "/start - Start the bot\n"
-        "/help - Show this help menu\n"
+        "/help - Show help\n"
         "/lang en - English\n"
         "/lang bn - Bengali\n"
-        "📚 Type a topic to search Wikipedia.",
-        parse_mode="Markdown"
+        "📚 Just type a topic to search on Wikipedia."
     )
 
 # /lang command
@@ -55,7 +53,7 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ Only 'en' and 'bn' are supported.")
 
-# Search Wikipedia and respond
+# Wikipedia search function
 async def search_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.strip()
     user_id = update.effective_user.id
@@ -79,18 +77,15 @@ async def search_topic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Command handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("lang", set_language))
-
-    # Message handler for Wikipedia searches
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search_topic))
 
-    print("🚀 Wiki-Ai Bot is running...")
+    print("🚀 Bot is running...")
     await app.run_polling()
 
-# Entry point
+# Run the bot
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
