@@ -8,7 +8,7 @@ from telegram.ext import (
 )
 
 # ✅ Get BOT_TOKEN from environment variable (Railway or local .env)
-BOT_TOKEN = os.getenv("7699905568:AAE2qfZEZfKRiw_jbpnB5zkthH9c93ovmNM")
+BOT_TOKEN = os.getenv("7699905568:AAHEhmdGFY9_w90fPgwD8BEEGLAKonJL6-o")
 if not BOT_TOKEN:
     raise ValueError("❌ BOT_TOKEN not found. Set it as an environment variable.")
 
